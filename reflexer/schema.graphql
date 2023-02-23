@@ -1,0 +1,241 @@
+enum ProposalStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  QUEUED
+  EXECUTED
+}
+
+type TokenHolder @entity {
+  "A TokenHolder is any address that holds any amount of Tokens, the id used is the blockchain address."
+  id: Bytes!
+
+  "Delegate address of the token holder which will participate in votings. Delegates don't need to hold any tokens and can even be the token holder itself."
+  delegate: Delegate
+
+  "Token balance of this address expressed in the smallest unit of the Token"
+  tokenBalanceRaw: BigInt!
+
+  "Token balance of this address expressed as a BigDecimal normalized value for the  Token"
+  tokenBalance: BigDecimal!
+
+  "Total amount of  Token ever held by this address expressed in the smallest unit of the Token"
+  totalTokensHeldRaw: BigInt!
+
+  "Total amount of  Token ever held by this address expressed as a BigDecimal normalized value for the Token"
+  totalTokensHeld: BigDecimal!
+}
+
+type Delegate @entity {
+  "A Delegate is any address that has been delegated with voting tokens by a token holder, id is the blockchain address of said delegate"
+  id: Bytes!
+
+  "Amount of votes delegated to this delegate to be used on proposal votings expressed in the smallest unit of the Token"
+  delegatedVotesRaw: BigInt!
+
+  "Amount of votes delegated to this delegate to be used on proposal votings expressed as a BigDecimal normalized value for the Token"
+  delegatedVotes: BigDecimal!
+
+  tokenHoldersRepresentedAmount: Int!
+
+  "Token holders that this delegate represents"
+  tokenHoldersRepresented: [TokenHolder!]! @derivedFrom(field: "delegate")
+
+  "Votes that a delegate has made in different proposals"
+  votes: [Vote!]! @derivedFrom(field: "voter")
+
+  "Number of proposals voted on"
+  numberVotes: Int!
+
+  "Proposals that the delegate has created"
+  proposals: [Proposal!]! @derivedFrom(field: "proposer")
+}
+
+type Proposal @entity {
+  "Internal proposal ID" 
+  id: ID!
+
+  "Delegate that proposed the change"
+  proposer: Delegate!
+
+  "Targets data for the change"
+  targets: [Bytes!]
+
+  "Values data for the change"
+  values: [BigInt!]
+
+  "Signature data for the change"
+  signatures: [String!]
+
+  "Call data for the change"
+  calldatas: [Bytes!]
+
+  "Transaction hash of proposal"
+  transactionHash: Bytes!
+
+  "Block number proposal was created in"
+  creationBlock: BigInt!
+
+  "Timestamp of block proposal was created in"
+  creationTime: BigInt!
+
+  "Block number from where the voting starts"
+  startBlock: BigInt!
+
+  "Block number from where the voting ends"
+  endBlock: BigInt!
+
+  "Block number proposal was executed in"
+  executionBlock: BigInt
+
+  "Timestamp of block proposal was executed in"
+  executionTime: BigInt
+
+  "Block number proposal was canceled in"
+  cancellationBlock: BigInt
+
+  "Timestamp of block proposal was canceled in"
+  cancellationTime: BigInt
+
+  "String description of the change"
+  description: String!
+
+  "Status of the proposal"
+  status: ProposalStatus!
+
+  "Once the proposal is queued for execution it will have an ETA of the execution"
+  executionETA: BigInt
+
+  "Votes associated to this proposal"
+  votes: [Vote!]! @derivedFrom(field: "proposal")
+
+  gasPrice: BigInt!
+
+  gasLimit: BigInt! 
+
+  gasUsed: BigInt!
+}
+
+type Vote @entity (immutable: true) {
+  "Delegate ID + Proposal ID"
+  id: ID!
+
+  "Whether the vote is in favour or against the proposal"
+  support: Boolean!
+
+  "Amount of votes in favour or against expressed in the smallest unit of the Token"
+  votesRaw: BigInt!
+
+  "Amount of votes in favour or against expressed as a BigDecimal normalized value for the  Token"
+  votes: BigDecimal!
+
+  "Delegate that emitted the vote"
+  voter: Delegate!
+
+  "Proposal that is being voted on"
+  proposal: Proposal!
+
+  "Blocknumber of vote"
+  blockNumber: BigInt!
+  
+  "Timestamp of vote"
+  timestamp: BigInt!
+
+  "Transactionhash of vote"
+  transactionHash: Bytes!
+
+  "Reason of vote"
+  reason: String
+  
+  gasPrice: BigInt!
+
+  gasLimit: BigInt! 
+
+  gasUsed: BigInt!
+}
+
+type Transfer @entity (immutable: true) {
+  id: Bytes!
+
+  from: Bytes!
+
+  to: Bytes!
+
+  amount: BigInt!
+
+  blockNumber: BigInt!
+  
+  timestamp: BigInt!
+
+  gasPrice: BigInt!
+
+  gasLimit: BigInt! 
+
+  gasUsed: BigInt!
+}
+
+type Delegation @entity (immutable: true) {
+  id: Bytes!
+
+  "Delegator"
+  from: Bytes!
+
+  "Delegate"
+  to: Bytes!
+
+  "Old delegate"
+  oldDelegate: Bytes!
+
+  "Amount of delegated votes"
+  amount: BigInt!
+
+  "Blocknumber of delegation"
+  blockNumber: BigInt!
+  
+  timestamp: BigInt!
+
+  gasPrice: BigInt!
+
+  gasLimit: BigInt! 
+
+  gasUsed: BigInt!
+
+  "Topic of every event in the log"
+  log: [Bytes!]
+}
+
+type Governance @entity {
+  "Unique entity used to keep track of common aggregated data"
+  id: ID!
+
+  "Number of proposals created"
+  proposals: BigInt!
+
+  "Total number of token holders currently"
+  currentTokenHolders: BigInt!
+
+  "Total number of delegates participating on the governance currently"
+  currentDelegates: BigInt!
+
+  "Total number of token holders"
+  totalTokenHolders: BigInt!
+
+  "Total number of delegates that held delegated votes"
+  totalDelegates: BigInt!
+
+  "Total number of votes delegated expressed in the smallest unit of the  Token"
+  delegatedVotesRaw: BigInt!
+
+  "Total number of votes delegated expressed as a BigDecimal normalized value for the  Token"
+  delegatedVotes: BigDecimal!
+
+  "Number of proposals currently queued for execution"
+  proposalsQueued: BigInt!
+
+  "Number of Transfers"
+  transfers: BigInt!
+
+  "Number of Transfers"
+  delegations: BigInt!
+
+}

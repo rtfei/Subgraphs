@@ -1,0 +1,66 @@
+specVersion: 0.0.4
+description: pooltogether governance subgraph
+schema:
+  file: ./schema.graphql
+dataSources:
+- kind: ethereum/contract
+  name: Governor
+  network: mainnet
+  source:
+    address: '0xB3a87172F555ae2a2AB79Be60B336D2F7D0187f0'
+    abi: Governor
+    startBlock: 11870114
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.7
+    language: wasm/assemblyscript
+    file: ./src/governor.ts
+    entities:
+    - Delegate
+    - TokenHolder
+    - Proposal
+    - Vote
+    - Governance
+    abis:
+    - name: Governor
+      file: ./abis/Governor.json
+    eventHandlers:
+    - event: ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)
+      handler: handleProposalCreated
+      receipt: true
+    - event: ProposalCanceled(uint256)
+      handler: handleProposalCanceled
+    - event: ProposalQueued(uint256,uint256)
+      handler: handleProposalQueued
+    - event: ProposalExecuted(uint256)
+      handler: handleProposalExecuted
+    - event: VoteCast(address,uint256,bool,uint256)
+      handler: handleVoteCast
+      receipt: true
+- kind: ethereum/contract
+  name: Token
+  network: mainnet
+  source:
+    address: '0x0cEC1A9154Ff802e7934Fc916Ed7Ca50bDE6844e'
+    abi: Token
+    startBlock: 11870113
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.7
+    language: wasm/assemblyscript
+    file: ./src/token.ts
+    entities:
+    - Delegate
+    - TokenHolder
+    abis:
+    - name: Token
+      file: ./abis/Token.json
+    eventHandlers:
+    - event: DelegateChanged(indexed address,indexed address,indexed address)
+      handler: handleDelegateChanged
+      receipt: true
+    - event: DelegateVotesChanged(indexed address,uint256,uint256)
+      handler: handleDelegateVotesChanged
+    - event: Transfer(indexed address,indexed address,uint256)
+      handler: handleTransfer
+      receipt: true

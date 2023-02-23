@@ -1,0 +1,66 @@
+specVersion: 0.0.4
+description: babylon governance subgraph
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Governor
+    network: mainnet
+    source:
+      address: "0xBEC3de5b14902C660Bd2C7EfD2F259998424cc24"
+      abi: Governor
+      startBlock: 13156656
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: Governor/Governor.wasm
+      entities:
+        - Delegate
+        - TokenHolder
+        - Proposal
+        - Vote
+        - Governance
+      abis:
+        - name: Governor
+          file: Governor/abis/Governor.json
+      eventHandlers:
+        - event: ProposalCreated(uint256,address,address[],uint256[],string[],bytes[],uint256,uint256,string)
+          handler: handleProposalCreated
+          receipt: true
+        - event: ProposalCanceled(uint256)
+          handler: handleProposalCanceled
+        - event: ProposalQueued(uint256,uint256)
+          handler: handleProposalQueued
+        - event: ProposalExecuted(uint256)
+          handler: handleProposalExecuted
+        - event: VoteCast(indexed address,uint256,uint8,uint256,string)
+          handler: handleVoteCast
+          receipt: true
+  - kind: ethereum/contract
+    name: Token
+    network: mainnet
+    source:
+      address: "0xF4Dc48D260C93ad6a96c5Ce563E70CA578987c74"
+      abi: Token
+      startBlock: 12859380
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: Token/Token.wasm
+      entities:
+        - Delegate
+        - TokenHolder
+      abis:
+        - name: Token
+          file: Token/abis/Token.json
+      eventHandlers:
+        - event: DelegateChanged(indexed address,indexed address,indexed address)
+          handler: handleDelegateChanged
+          receipt: true
+        - event: DelegateVotesChanged(indexed address,uint256,uint256)
+          handler: handleDelegateVotesChanged
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+          receipt: true
